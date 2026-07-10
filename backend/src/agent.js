@@ -161,23 +161,11 @@ async function lookupTicker(state, config) {
     }
   } catch (error) {
     console.error("Ticker lookup error:", error);
+    throw new Error(`Ticker database connection failed. Please check your network.`);
   }
 
-  // Fallback if Yahoo Finance API fails or company not found
-  return {
-    ticker: name.toUpperCase(),
-    priceInfo: {
-      symbol: name.toUpperCase(),
-      longName: name,
-      sector: "Diversified",
-      industry: "General",
-      price: 100.0,
-      currency: "USD",
-      high52w: 120.0,
-      low52w: 80.0,
-    },
-    logs: addLog(logs, `Could not resolve official ticker. Proceeding with query name "${name}" as ticker.`)
-  };
+  // Throw validation error if no equity is found
+  throw new Error(`Could not resolve "${name}" to any valid company ticker. Please enter a valid company name (e.g. Apple, Google, Tata).`);
 }
 
 // Graph Node 2: Financial Search & Analysis

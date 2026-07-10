@@ -73,6 +73,19 @@ export default function App() {
   };
 
   const runClientSideSimulation = (searchQuery) => {
+    const nameLower = searchQuery.toLowerCase().trim();
+    const hasVowels = /[aeiouy]/i.test(nameLower);
+    const isTooShort = nameLower.length < 2;
+    const isGibberish = (!hasVowels && nameLower.length > 2) || /[^a-zA-Z\s0-9.&]/.test(nameLower) || nameLower === "asd" || nameLower === "qwer" || nameLower === "qwerty" || nameLower === "xyz" || nameLower === "12345" || nameLower === "asdf" || nameLower === "zxcv";
+
+    if (isTooShort || isGibberish) {
+      setTimeout(() => {
+        setError(`Could not resolve "${searchQuery}" to any valid company ticker. Please enter a valid company name (e.g. Apple, Google, Tata).`);
+        setIsResearching(false);
+      }, 800);
+      return;
+    }
+
     let mockLogs = [];
     const addMockLog = (msg) => {
       const log = `${new Date().toLocaleTimeString()}: ${msg}`;

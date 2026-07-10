@@ -384,14 +384,14 @@ function getMockReport(state, logs) {
 // Build the LangGraph Workflow Graph
 export function buildResearchGraph() {
   const workflow = new StateGraph(ResearchState)
-    .addNode("ticker", lookupTicker)
+    .addNode("resolveTicker", lookupTicker)
     .addNode("financials", analyzeFinancials)
     .addNode("sentiment", analyzeNews)
     .addNode("risks", assessRisks)
     .addNode("thesis", synthesizeDecision)
     
-    .addEdge("__start__", "ticker")
-    .addEdge("ticker", "financials")
+    .addEdge("__start__", "resolveTicker")
+    .addEdge("resolveTicker", "financials")
     .addEdge("financials", "sentiment")
     .addEdge("sentiment", "risks")
     .addEdge("risks", "thesis")

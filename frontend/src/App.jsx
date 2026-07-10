@@ -337,7 +337,7 @@ export default function App() {
                 if (stepLogs) setLogs(stepLogs);
                 
                 // Track node completed
-                if (stepId === "ticker") {
+                if (stepId === "ticker" || stepId === "resolveTicker") {
                   setCurrentStepId("financials");
                   setCompletedStepIds(["ticker"]);
                 } else if (stepId === "financials") {

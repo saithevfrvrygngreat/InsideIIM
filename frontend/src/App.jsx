@@ -15,10 +15,10 @@ import {
   ArrowRight,
   Database
 } from "lucide-react";
-import SettingsModal from "./components/SettingsModal";
-import AgentGraphVisualizer from "./components/AgentGraphVisualizer";
+import SettingsModal from "./components/SettingsModal.jsx";
+import AgentGraphVisualizer from "./components/AgentGraphVisualizer.jsx";
 
-async function fetchWithTimeout(url: string, options: any, timeout = 2500): Promise<Response> {
+async function fetchWithTimeout(url, options, timeout = 2500) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
@@ -37,21 +37,21 @@ async function fetchWithTimeout(url: string, options: any, timeout = 2500): Prom
 export default function App() {
   const [query, setQuery] = useState("");
   const [isResearching, setIsResearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   
   // Settings modal state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   // Agent states
-  const [currentStepId, setCurrentStepId] = useState<string | undefined>(undefined);
-  const [completedStepIds, setCompletedStepIds] = useState<string[]>([]);
-  const [logs, setLogs] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<"thesis" | "proscons" | "sources" | "logs">("thesis");
+  const [currentStepId, setCurrentStepId] = useState(undefined);
+  const [completedStepIds, setCompletedStepIds] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [activeTab, setActiveTab] = useState("thesis");
   
   // Final report results
-  const [report, setReport] = useState<any | null>(null);
+  const [report, setReport] = useState(null);
 
-  const logEndRef = useRef<HTMLDivElement>(null);
+  const logEndRef = useRef(null);
 
   // Auto-scroll logs
   useEffect(() => {
@@ -71,9 +71,10 @@ export default function App() {
     }
     return { geminiKey: "", openaiKey: "", tavilyKey: "" };
   };
-  const runClientSideSimulation = (searchQuery: string) => {
-    let mockLogs: string[] = [];
-    const addMockLog = (msg: string) => {
+
+  const runClientSideSimulation = (searchQuery) => {
+    let mockLogs = [];
+    const addMockLog = (msg) => {
       const log = `${new Date().toLocaleTimeString()}: ${msg}`;
       mockLogs = [...mockLogs, log];
       setLogs(mockLogs);
@@ -122,11 +123,11 @@ export default function App() {
                       setTimeout(() => {
                         // Generate mock data based on input query
                         const name = searchQuery.toLowerCase();
-                        let decision: "INVEST" | "PASS" = "INVEST";
+                        let decision = "INVEST";
                         let score = 78;
                         let reasoning = "";
-                        let pros: string[] = [];
-                        let cons: string[] = [];
+                        let pros = [];
+                        let cons = [];
 
                         if (name.includes("apple") || name.includes("aapl")) {
                           decision = "INVEST";
@@ -134,7 +135,7 @@ export default function App() {
                           reasoning = `Apple Inc. continues to show outstanding financial resilience, fueled by its dominant ecosystem and recurring services revenue. With over 2.2 billion active devices globally, the company enjoys massive customer lock-in. Their capital return program, including heavy stock buybacks and dividends, provides a solid floor for shareholders. Although hardware growth (specifically iPhones) has slowed in mature markets, emerging opportunities in spatial computing, AI integration (Apple Intelligence), and fintech position Apple for steady long-term compounding.`;
                           pros = [
                             "Unrivaled brand loyalty and deep ecosystem lock-in.",
-                            "High profit margins and massive free cash flow generation ($100B+ annually).",
+                            "High profit margins and massive free cash flow generation ($105B+ annually).",
                             "Apple Intelligence rollouts driving a strong hardware upgrade super-cycle."
                           ];
                           cons = [
@@ -235,7 +236,7 @@ export default function App() {
     }, 500);
   };
 
-  const handleSearch = async (searchQuery: string) => {
+  const handleSearch = async (searchQuery) => {
     if (!searchQuery.trim() || isResearching) return;
     
     setIsResearching(true);
@@ -285,7 +286,7 @@ export default function App() {
       if (!contentType.includes("text/event-stream")) {
         throw new Error("Invalid response content type: " + contentType);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.warn("Could not connect to the Express research backend. Running client-side simulation...", err);
       useSimulation = true;
     }
@@ -351,7 +352,7 @@ export default function App() {
                 }
 
                 // Keep intermediate state updated
-                setReport((prev: any) => ({
+                setReport((prev) => ({
                   ...prev,
                   ticker,
                   priceInfo,
@@ -377,14 +378,14 @@ export default function App() {
           }
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Search fetch error:", err);
       setError(err.message || "Could not connect to the Express research backend.");
       setIsResearching(false);
     }
   };
 
-  const handleSuggestionClick = (name: string) => {
+  const handleSuggestionClick = (name) => {
     setQuery(name);
     handleSearch(name);
   };
@@ -643,7 +644,7 @@ export default function App() {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as any)}
+                      onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center gap-2 px-5 py-4 text-xs font-semibold border-b-2 transition-colors whitespace-nowrap ${
                         isActive
                           ? "border-accent-gold text-accent-gold bg-card"
@@ -668,7 +669,7 @@ export default function App() {
                     </h4>
                     <div className="font-serif text-sm md:text-base text-muted-text space-y-4">
                       {report.reasoning ? (
-                        report.reasoning.split("\n\n").map((para: string, idx: number) => (
+                        report.reasoning.split("\n\n").map((para, idx) => (
                           <p key={idx} className="whitespace-pre-line">{para}</p>
                         ))
                       ) : (
@@ -689,7 +690,7 @@ export default function App() {
                       </h4>
                       <ul className="space-y-3">
                         {report.pros && report.pros.length > 0 ? (
-                          report.pros.map((pro: string, idx: number) => (
+                          report.pros.map((pro, idx) => (
                             <li key={idx} className="flex gap-2.5 items-start text-xs text-muted-text leading-relaxed">
                               <span className="h-1.5 w-1.5 rounded-full bg-lime-700 shrink-0 mt-2" />
                               <span>{pro}</span>
@@ -709,7 +710,7 @@ export default function App() {
                       </h4>
                       <ul className="space-y-3">
                         {report.cons && report.cons.length > 0 ? (
-                          report.cons.map((con: string, idx: number) => (
+                          report.cons.map((con, idx) => (
                             <li key={idx} className="flex gap-2.5 items-start text-xs text-muted-text leading-relaxed">
                               <span className="h-1.5 w-1.5 rounded-full bg-red-700 shrink-0 mt-2" />
                               <span>{con}</span>
@@ -734,7 +735,7 @@ export default function App() {
                     </p>
                     <ul className="space-y-2 mt-4">
                       {report.sources && report.sources.length > 0 ? (
-                        report.sources.map((src: string, idx: number) => (
+                        report.sources.map((src, idx) => (
                           <li key={idx} className="flex items-center gap-2 text-xs font-semibold text-accent-gold hover:text-amber-800 transition-colors">
                             <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                             {src.startsWith("http") ? (
@@ -757,7 +758,7 @@ export default function App() {
                 {activeTab === "logs" && (
                   <div className="rounded-lg border border-border-custom bg-stone-950 p-4 font-mono text-xs text-stone-400 space-y-1.5 max-h-[350px] overflow-y-auto">
                     {report.logs && report.logs.length > 0 ? (
-                      report.logs.map((log: string, index: number) => (
+                      report.logs.map((log, index) => (
                         <div key={index} className="leading-relaxed">
                           <span className="text-accent-gold select-none mr-2">&gt;</span>
                           {log}
@@ -793,7 +794,7 @@ export default function App() {
       {/* Footer */}
       <footer className="border-t border-border-custom bg-card/60 py-8 px-6 mt-12 text-center text-xs text-muted-text space-y-2">
         <p className="font-semibold text-foreground">InsideIIM Investment Research Agent</p>
-        <p>Built with React (Vite) and Node.js Express. Styled using the Slate & Beige premium color scheme.</p>
+        <p>Built with React and Node.js Express. Styled using the Slate & Beige premium color scheme.</p>
         <p className="text-[10px] text-stone-400 font-mono">Run: npm run dev | Workspace: Trevel/insideiim</p>
       </footer>
 

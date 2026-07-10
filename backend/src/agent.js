@@ -5,31 +5,29 @@ import { ChatOpenAI } from "@langchain/openai";
 
 // Define the state of the LangGraph research agent
 export const ResearchState = Annotation.Root({
-  companyName: Annotation<string>(),
-  ticker: Annotation<string>(),
-  priceInfo: Annotation<any>(),
-  financialData: Annotation<string>(),
-  newsData: Annotation<string>(),
-  riskData: Annotation<string>(),
-  decision: Annotation<"INVEST" | "PASS">(),
-  score: Annotation<number>(),
-  reasoning: Annotation<string>(),
-  pros: Annotation<string[]>(),
-  cons: Annotation<string[]>(),
-  sources: Annotation<string[]>(),
-  logs: Annotation<string[]>(),
+  companyName: Annotation(),
+  ticker: Annotation(),
+  priceInfo: Annotation(),
+  financialData: Annotation(),
+  newsData: Annotation(),
+  riskData: Annotation(),
+  decision: Annotation(),
+  score: Annotation(),
+  reasoning: Annotation(),
+  pros: Annotation(),
+  cons: Annotation(),
+  sources: Annotation(),
+  logs: Annotation(),
 });
 
-export type ResearchStateType = typeof ResearchState.State;
-
 // Simple helper to log steps in real-time
-function addLog(logs: string[] = [], message: string): string[] {
+function addLog(logs = [], message) {
   console.log(`[AGENT LOG] ${message}`);
   return [...logs, `${new Date().toLocaleTimeString()}: ${message}`];
 }
 
 // Simple web search fallback using DuckDuckGo HTML scraping if Tavily is unavailable
-async function webSearchFallback(query: string): Promise<string> {
+async function webSearchFallback(query) {
   try {
     const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
     const response = await fetch(url, {
@@ -42,7 +40,7 @@ async function webSearchFallback(query: string): Promise<string> {
     
     // Extract search result snippets
     const matches = html.matchAll(/<a class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g);
-    const snippets: string[] = [];
+    const snippets = [];
     for (const match of matches) {
       const cleanSnippet = match[1]
         .replace(/<[^>]*>/g, "")
@@ -59,7 +57,7 @@ async function webSearchFallback(query: string): Promise<string> {
 }
 
 // Perform web search using Tavily if key is provided, else fallback to DDG HTML
-async function searchWeb(query: string, tavilyKey?: string): Promise<{ content: string; sources: string[] }> {
+async function searchWeb(query, tavilyKey) {
   if (tavilyKey && tavilyKey.trim()) {
     try {
       const response = await fetch("https://api.tavily.com/search", {
@@ -74,8 +72,8 @@ async function searchWeb(query: string, tavilyKey?: string): Promise<{ content: 
       });
       if (response.ok) {
         const data = await response.json();
-        const content = data.results.map((r: any) => `${r.title}: ${r.content}`).join("\n\n");
-        const sources = data.results.map((r: any) => r.url);
+        const content = data.results.map((r) => `${r.title}: ${r.content}`).join("\n\n");
+        const sources = data.results.map((r) => r.url);
         return { content, sources };
       }
     } catch (e) {
@@ -89,7 +87,7 @@ async function searchWeb(query: string, tavilyKey?: string): Promise<{ content: 
 }
 
 // Get the appropriate LLM model based on user-supplied keys
-function getModel(keys: { geminiKey?: string; openaiKey?: string }) {
+function getModel(keys) {
   if (keys.geminiKey && keys.geminiKey.trim()) {
     return new ChatGoogleGenerativeAI({
       apiKey: keys.geminiKey,
@@ -107,7 +105,7 @@ function getModel(keys: { geminiKey?: string; openaiKey?: string }) {
 }
 
 // Graph Node 1: Lookup Ticker
-async function lookupTicker(state: ResearchStateType, config: any): Promise<Partial<ResearchStateType>> {
+async function lookupTicker(state, config) {
   const name = state.companyName;
   const logs = addLog(state.logs, `Searching ticker database for "${name}"...`);
 
@@ -119,7 +117,7 @@ async function lookupTicker(state: ResearchStateType, config: any): Promise<Part
 
     if (searchResponse.ok) {
       const searchData = await searchResponse.json();
-      const firstQuote = searchData.quotes?.find((q: any) => q.quoteType === "EQUITY");
+      const firstQuote = searchData.quotes?.find((q) => q.quoteType === "EQUITY");
       
       if (firstQuote) {
         const symbol = firstQuote.symbol;
@@ -183,7 +181,7 @@ async function lookupTicker(state: ResearchStateType, config: any): Promise<Part
 }
 
 // Graph Node 2: Financial Search & Analysis
-async function analyzeFinancials(state: ResearchStateType, config: any): Promise<Partial<ResearchStateType>> {
+async function analyzeFinancials(state, config) {
   const name = state.priceInfo?.longName || state.companyName;
   const symbol = state.ticker || state.companyName;
   const keys = config?.configurable?.keys || {};
@@ -200,7 +198,7 @@ async function analyzeFinancials(state: ResearchStateType, config: any): Promise
 }
 
 // Graph Node 3: News & Sentiment Gathering
-async function analyzeNews(state: ResearchStateType, config: any): Promise<Partial<ResearchStateType>> {
+async function analyzeNews(state, config) {
   const name = state.priceInfo?.longName || state.companyName;
   const symbol = state.ticker || state.companyName;
   const keys = config?.configurable?.keys || {};
@@ -217,7 +215,7 @@ async function analyzeNews(state: ResearchStateType, config: any): Promise<Parti
 }
 
 // Graph Node 4: Risk Profiler
-async function assessRisks(state: ResearchStateType, config: any): Promise<Partial<ResearchStateType>> {
+async function assessRisks(state, config) {
   const name = state.priceInfo?.longName || state.companyName;
   const symbol = state.ticker || state.companyName;
   const keys = config?.configurable?.keys || {};
@@ -234,7 +232,7 @@ async function assessRisks(state: ResearchStateType, config: any): Promise<Parti
 }
 
 // Graph Node 5: Thesis Synthesizer
-async function synthesizeDecision(state: ResearchStateType, config: any): Promise<Partial<ResearchStateType>> {
+async function synthesizeDecision(state, config) {
   const keys = config?.configurable?.keys || {};
   const logs = addLog(state.logs, `Synthesizing final investment decision and generating rating...`);
   
@@ -291,13 +289,13 @@ Ensure the JSON is valid and only the JSON is returned, without markdown ticks.`
 }
 
 // High fidelity Mock Analysis generator for Demo Mode
-function getMockReport(state: ResearchStateType, logs: string[]): Partial<ResearchStateType> {
+function getMockReport(state, logs) {
   const name = state.companyName.toLowerCase();
-  let decision: "INVEST" | "PASS" = "INVEST";
+  let decision = "INVEST";
   let score = 78;
   let reasoning = "";
-  let pros: string[] = [];
-  let cons: string[] = [];
+  let pros = [];
+  let cons = [];
 
   if (name.includes("apple") || name.includes("aapl")) {
     decision = "INVEST";
@@ -405,11 +403,7 @@ export function buildResearchGraph() {
 /**
  * Execute the investment research agent.
  */
-export async function runResearchAgent(
-  companyName: string,
-  keys: { geminiKey?: string; openaiKey?: string; tavilyKey?: string },
-  onStepCallback?: (stepId: string, state: Partial<ResearchStateType>) => void
-): Promise<ResearchStateType> {
+export async function runResearchAgent(companyName, keys, onStepCallback) {
   const graph = buildResearchGraph();
   
   // Initial state configuration
@@ -420,7 +414,7 @@ export async function runResearchAgent(
     financialData: "",
     newsData: "",
     riskData: "",
-    decision: "PASS" as const,
+    decision: "PASS",
     score: 0,
     reasoning: "",
     pros: [],
@@ -437,7 +431,7 @@ export async function runResearchAgent(
   let currentState = { ...initialState };
 
   for await (const update of stream) {
-    const updateAny = update as any;
+    const updateAny = update;
     const nodeName = Object.keys(updateAny)[0];
     if (nodeName && updateAny[nodeName]) {
       const nodeOutput = updateAny[nodeName];

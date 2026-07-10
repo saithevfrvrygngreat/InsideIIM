@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Key, Eye, EyeOff, Check, AlertCircle } from "lucide-react";
 
-interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose }) {
   const [geminiKey, setGeminiKey] = useState("");
   const [openaiKey, setOpenaiKey] = useState("");
   const [tavilyKey, setTavilyKey] = useState("");

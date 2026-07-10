@@ -1,14 +1,7 @@
 import React from "react";
 import { Search, BarChart3, Newspaper, AlertTriangle, Lightbulb, Check } from "lucide-react";
 
-interface Step {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ComponentType<any>;
-}
-
-const steps: Step[] = [
+const steps = [
   {
     id: "ticker",
     name: "Ticker Resolver",
@@ -41,15 +34,10 @@ const steps: Step[] = [
   },
 ];
 
-interface AgentGraphVisualizerProps {
-  currentStepId?: string;
-  completedStepIds: string[];
-}
-
 export default function AgentGraphVisualizer({
   currentStepId,
-  completedStepIds,
-}: AgentGraphVisualizerProps) {
+  completedStepIds = [],
+}) {
   return (
     <div className="rounded-xl border border-border-custom bg-card p-6 shadow-xs">
       <h3 className="font-serif text-lg font-semibold text-foreground mb-1">

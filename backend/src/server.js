@@ -1,7 +1,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 import express from "express";
 import cors from "cors";
-import { runResearchAgent } from "./agent.ts";
+import { runResearchAgent } from "./agent.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Main Research SSE API endpoint
-app.post("/api/research", async (req: express.Request, res: express.Response) => {
+app.post("/api/research", async (req, res) => {
   const { companyName, geminiKey, openaiKey, tavilyKey } = req.body;
 
   if (!companyName || typeof companyName !== "string" || !companyName.trim()) {
@@ -33,8 +33,8 @@ app.post("/api/research", async (req: express.Request, res: express.Response) =>
     "Connection": "keep-alive",
   });
 
-  const sendEvent = (event: string, data: any) => {
-    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  const sendEvent = (eventName, data) => {
+    res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
   try {
@@ -59,7 +59,7 @@ app.post("/api/research", async (req: express.Request, res: express.Response) =>
     );
 
     sendEvent("done", finalResult);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Express backend runResearchAgent error:", error);
     sendEvent("error", { message: error.message || "An unknown error occurred during research." });
   } finally {

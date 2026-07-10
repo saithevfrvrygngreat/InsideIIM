@@ -251,9 +251,19 @@ export default function App() {
     let response;
     let useSimulation = false;
 
+    let primaryUrl = "/api/research";
+    let fallbackUrl = "http://localhost:3001/api/research";
+
+    const envUrl = import.meta.env.VITE_API_URL;
+    if (envUrl && envUrl.trim()) {
+      const cleanUrl = envUrl.endsWith("/") ? envUrl.slice(0, -1) : envUrl.trim();
+      primaryUrl = `${cleanUrl}/api/research`;
+      fallbackUrl = `${cleanUrl}/api/research`;
+    }
+
     try {
       try {
-        response = await fetchWithTimeout("/api/research", {
+        response = await fetchWithTimeout(primaryUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -264,8 +274,8 @@ export default function App() {
           }),
         }, 2000);
       } catch (proxyError) {
-        console.warn("Vite API proxy failed, attempting direct Express port 3001 connection...", proxyError);
-        response = await fetchWithTimeout("http://localhost:3001/api/research", {
+        console.warn("Primary API connection failed, attempting fallback...", proxyError);
+        response = await fetchWithTimeout(fallbackUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
